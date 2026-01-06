@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新店顏家 - 模擬聊天群組</title>
+    <title>新店顏家 - 瘋狂互噴版</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         #setup { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 300px; }
@@ -24,9 +24,9 @@
 
 <div id="setup">
     <h2>新店顏家 模擬器</h2>
-    <p>選擇聊天模式：</p>
+    <p>模式：瘋狂互噴連鎖版</p>
     <select id="mode">
-        <option value="group">全體群組 (自發聊天 ON)</option>
+        <option value="group">全體群組 (高頻率互噴)</option>
         <option value="single_熊剛剛Jimmy">單聊：熊剛剛Jimmy</option>
         <option value="single_王水源">單聊：王水源</option>
         <option value="single_黃子庭 Troy">單聊：黃子庭 Troy</option>
@@ -36,7 +36,7 @@
 </div>
 
 <div id="chat-container">
-    <div id="status-bar" id="typing-indicator">新店顏家 (4)</div>
+    <div id="status-bar">新店顏家 (4)</div>
     <div id="messages"></div>
     <div class="input-box">
         <input type="text" id="userInput" placeholder="傳送訊息..." onkeypress="if(event.keyCode==13) doSend()">
@@ -47,24 +47,26 @@
 <script>
 const friends = {
     "熊剛剛Jimmy": {
-        fallbacks: ["笑死", "尊都假嘟", "我不信", "牛逼", "好扯", "到底"],
+        fallbacks: ["笑死", "尊都假嘟", "我不信", "牛逼", "到底"],
         keywords: { 
             "分手": "風險對沖加槓桿的概念，真的", 
-            "睡": "大半夜不睡覺在這邊吵",
-            "不信": "那我就放心了",
-            "子庭": "他在那邊耍大牌吧"
+            "子庭": "他在那邊耍大牌吧",
+            "嘉恩": "嘉恩這話題很危險喔，水源會發瘋",
+            "機票": "改機票不是你的專長嗎 @黃子庭 Troy",
+            "旺宏": "笑死，還有人在車上嗎"
         },
-        topics: ["笑死，你們看這個", "嘿嘿，尊都假嘟", "到底在笑什麼啦", "好扯喔"]
+        topics: ["嘿嘿，王水源又要聊嘉恩了", "黃子庭是不是在發瘋", "笑死，這群沒一個正常的", "到底在吵什麼啦"]
     },
     "王水源": {
-        fallbacks: ["都可以啊", "假賽啦", "幹你娘會被你們害死", "無言", "好痛苦"],
+        fallbacks: ["假賽啦", "幹你娘會被你們害死", "無言", "好痛苦", "都可以啊"],
         keywords: { 
             "嘉恩": "我先修理她，媽的想找個正常人交往好難", 
             "錢": "收一下門票錢，為了我的錢包謝謝", 
             "股票": "旺宏亮燈兩天了，有人還在車上嗎",
-            "帥": "你長得很像中國幹片裡的霸道總裁，顧北辰"
+            "子庭": "子庭滿適合去中國發展的啊，霸道總裁",
+            "不信": "你不信？我才不信你會還錢"
         },
-        topics: ["我好痛苦", "媽的想找個正常人好好交往那麼難", "顧北辰，又高又帥全身黑", "旺宏亮燈兩天了，有人還在車上嗎"]
+        topics: ["我好痛苦", "嘉恩這女人真的沒救", "顧北辰，又高又帥全身黑", "旺宏亮燈兩天了，準備跳車"]
     },
     "黃子庭 Troy": {
         fallbacks: ["白癡", "操你媽", "小硬", "Fuckable", "煩都煩死", "三條細狗"],
@@ -72,19 +74,21 @@ const friends = {
             "機票": "改來改去操他媽，浪費我錢", 
             "正常": "你算幸運了，我這邊沒一個正常的", 
             "怒": "如果你是想激怒我，恭喜你，你成功了",
-            "大陸": "怎麼說，我適合去中國發展嗎"
+            "水源": "水源除了嘉恩還會聊什麼？",
+            "顧北辰": "霸你媽，你才顧北辰"
         },
-        topics: ["白癡喔", "為什麼只有我是局外人", "操你媽改來改去", "三條細狗", "如果你是想激怒我，恭喜你"]
+        topics: ["白癡喔", "為什麼只有我是局外人", "操你媽機票改來改去", "你們這群細狗"]
     },
     "Gee Homie": {
-        fallbacks: ["愛了", "不愛了", "三小啦", "行", "笑死", "好慘會被遣返"],
+        fallbacks: ["愛了", "不愛了", "三小啦", "行", "好慘會被遣返"],
         keywords: { 
             "約": "明天晚上集合，幾點到吳興街？", 
             "吃啥": "看要吃啥都行除了火鍋", 
             "資料": "管家，三分鐘之內我要娶大陸人全部的資料",
-            "乾爹": "這是通知不是商量"
+            "遣返": "好慘會被遣返，真的愛了",
+            "嘉恩": "管家，三分鐘內我要嘉恩的資料"
         },
-        topics: ["三小啦", "慢來，吃東西不揪？", "行", "愛了", "這是通知不是商量", "真·乾爹"]
+        topics: ["三小啦", "慢來，吃東西不揪？", "這是通知不是商量", "真·乾爹在此"]
     }
 };
 
@@ -95,46 +99,53 @@ function initChat() {
     const val = document.getElementById('mode').value;
     config.mode = val === 'group' ? 'group' : 'single';
     if(config.mode === 'single') config.target = val.replace('single_', '');
-    
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "連線成功。", "bot");
-
+    addMsg("系統", "連線成功。群組成員進入瘋狂互噴模式。", "bot");
     if(config.mode === 'group') resetAutoTimer();
 }
 
-// 80% 機率引發連鎖反應
-function triggerChainReaction(excludeName) {
-    if (Math.random() > 0.8) return; 
+// 遞歸掃描：讓對話產生連鎖反應
+function scanForReaction(sender, text) {
+    if (config.mode !== 'group') return;
 
-    const others = Object.keys(friends).filter(n => n !== excludeName);
-    const reactor = others[Math.floor(Math.random() * others.length)];
-    
-    setTimeout(() => {
-        const reply = friends[reactor].fallbacks[Math.floor(Math.random() * friends[reactor].fallbacks.length)];
-        addMsg(reactor, reply, "bot");
+    // 隨機打亂檢查順序，讓接話的人不固定
+    const names = Object.keys(friends).filter(n => n !== sender).sort(() => Math.random() - 0.5);
 
-        // 二次連鎖機率
-        if(Math.random() < 0.4) {
-            setTimeout(() => {
-                const third = others.filter(n => n !== reactor)[Math.floor(Math.random() * 2)];
-                const secondReply = friends[third].fallbacks[Math.floor(Math.random() * friends[third].fallbacks.length)];
-                addMsg(third, secondReply, "bot");
-            }, 700);
+    for (let name of names) {
+        for (let key in friends[name].keywords) {
+            if (text.includes(key)) {
+                // 提高觸發機率至 95%
+                if (Math.random() < 0.95) {
+                    setTimeout(() => {
+                        addMsg(name, friends[name].keywords[key], "bot");
+                    }, 400 + Math.floor(Math.random() * 800)); // 縮短互噴延遲
+                }
+                return; // 每次掃描只觸發一個，但 addMsg 會再次呼叫此函式形成遞歸
+            }
         }
-    }, 600);
+    }
+
+    // 如果沒有關鍵字，但隨機 30% 機率會有人出來講 fallback (吐槽)
+    if (Math.random() < 0.3) {
+        setTimeout(() => {
+            const rName = names[Math.floor(Math.random() * names.length)];
+            const fallback = friends[rName].fallbacks[Math.floor(Math.random() * friends[rName].fallbacks.length)];
+            addMsg(rName, fallback, "bot");
+        }, 1200);
+    }
 }
 
 function resetAutoTimer() {
     if(autoTimer) clearTimeout(autoTimer);
-    const nextInterval = 4000 + Math.floor(Math.random() * 6000); // 4-10秒自發一次
+    // 提高自發聊天頻率 (2-6秒)
+    const nextInterval = 2000 + Math.floor(Math.random() * 4000);
     
     autoTimer = setTimeout(() => {
         if(config.mode === 'group') {
             const name = Object.keys(friends)[Math.floor(Math.random() * 4)];
             const topic = friends[name].topics[Math.floor(Math.random() * friends[name].topics.length)];
             addMsg(name, topic, "bot");
-            triggerChainReaction(name);
         }
         resetAutoTimer();
     }, nextInterval);
@@ -149,18 +160,11 @@ function doSend() {
     input.value = "";
     resetAutoTimer();
 
-    const delay = 500 + Math.floor(Math.random() * 1200);
-    const status = document.getElementById('status-bar');
-    status.innerText = "💬 有人正在輸入...";
-
     setTimeout(() => {
         let name = config.mode === 'single' ? config.target : Object.keys(friends)[Math.floor(Math.random()*4)];
         let reply = getReply(name, text);
         addMsg(name, reply, "bot");
-        status.innerText = config.mode === 'group' ? "新店顏家 (4)" : `與 ${name} 對話中`;
-        
-        if(config.mode === 'group') triggerChainReaction(name);
-    }, delay);
+    }, 400 + Math.floor(Math.random() * 800));
 }
 
 function getReply(name, input) {
@@ -179,6 +183,11 @@ function addMsg(sender, text, type) {
     d.innerHTML = `${nameHtml}${text}`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
+
+    // 核心邏輯：每發一條訊息，就掃描一次有沒有人要接話
+    if (type === 'bot' && sender !== "系統") {
+        scanForReaction(sender, text);
+    }
 }
 </script>
 </body>
