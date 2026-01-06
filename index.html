@@ -3,43 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新店顏家 - 瘋狂互噴版</title>
+    <title>新店顏家 - 終極靈魂模擬器</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        #setup { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 300px; }
+        #setup { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 320px; }
         #chat-container { display: none; width: 100%; max-width: 500px; height: 100vh; background: #84a1c1; flex-direction: column; }
-        #status-bar { background: rgba(0,0,0,0.15); padding: 10px 15px; font-size: 13px; color: white; font-weight: bold; }
-        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
-        .msg { margin-bottom: 12px; padding: 8px 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; max-width: 75%; position: relative; word-wrap: break-word; }
+        #status-bar { background: rgba(0,0,0,0.15); padding: 12px 15px; font-size: 13px; color: white; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; scroll-behavior: smooth; }
+        .msg { margin-bottom: 12px; padding: 10px 14px; border-radius: 18px; font-size: 14.5px; line-height: 1.5; max-width: 80%; position: relative; word-wrap: break-word; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .msg.bot { background: white; align-self: flex-start; border-top-left-radius: 2px; }
         .msg.user { background: #95ec69; align-self: flex-end; border-top-right-radius: 2px; }
-        .name { font-size: 11px; color: #444; margin-bottom: 3px; font-weight: bold; }
+        .name { font-size: 11px; color: #555; margin-bottom: 4px; font-weight: bold; }
         .input-box { background: #fff; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 10px 15px; outline: none; }
-        button { background: #00c300; color: white; border: none; padding: 0 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        select { padding: 10px; border-radius: 5px; margin: 15px 0; width: 100%; border: 1px solid #ccc; }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; font-size: 15px; }
+        button { background: #00c300; color: white; border: none; padding: 0 22px; border-radius: 25px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="setup">
     <h2>新店顏家 模擬器</h2>
-    <p>模式：瘋狂互噴連鎖版</p>
-    <select id="mode">
-        <option value="group">全體群組 (高頻率互噴)</option>
+    <p style="font-size: 14px; color: #666;">優化內容：深度紀錄提取 + 連鎖互噴</p>
+    <select id="mode" style="width: 100%; padding: 10px; margin-bottom: 20px;">
+        <option value="group">🔊 全體群組 (瘋狂吵架)</option>
         <option value="single_熊剛剛Jimmy">單聊：熊剛剛Jimmy</option>
         <option value="single_王水源">單聊：王水源</option>
         <option value="single_黃子庭 Troy">單聊：黃子庭 Troy</option>
         <option value="single_Gee Homie">單挑：Gee Homie</option>
     </select>
-    <button onclick="initChat()" style="width: 100%; padding: 10px;">進入聊天</button>
+    <button onclick="initChat()" style="width: 100%; padding: 12px;">進入聊天</button>
 </div>
 
 <div id="chat-container">
-    <div id="status-bar">新店顏家 (4)</div>
+    <div id="status-bar" id="typing-status">新店顏家 (4)</div>
     <div id="messages"></div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="傳送訊息..." onkeypress="if(event.keyCode==13) doSend()">
+        <input type="text" id="userInput" placeholder="輸入：機票、嘉恩、旺宏、帥..." onkeypress="if(event.keyCode==13) doSend()">
         <button onclick="doSend()">傳送</button>
     </div>
 </div>
@@ -47,48 +46,49 @@
 <script>
 const friends = {
     "熊剛剛Jimmy": {
-        fallbacks: ["笑死", "尊都假嘟", "我不信", "牛逼", "到底"],
+        fallbacks: ["笑死", "尊都假嘟", "我不信", "到底", "好扯", "笑破"],
         keywords: { 
-            "分手": "風險對沖加槓桿的概念，真的", 
-            "子庭": "他在那邊耍大牌吧",
-            "嘉恩": "嘉恩這話題很危險喔，水源會發瘋",
-            "機票": "改機票不是你的專長嗎 @黃子庭 Troy",
-            "旺宏": "笑死，還有人在車上嗎"
+            "分手": "風險對沖加槓桿的概念，真的建議分一分，止損啊大哥", 
+            "大牌": "我也是可以耍大牌直接走人啦，總經理可以沒特助，但我不能沒瓜吃",
+            "機票": "帶四川媳婦都不用一直改機票，省多少錢，妳們真的贏了",
+            "嘉恩": "笑死，水源又要開始痛苦了，到底是要聊幾次 @王水源",
+            "睡": "大半夜不睡覺在這邊吵，明天不用上班？"
         },
-        topics: ["嘿嘿，王水源又要聊嘉恩了", "黃子庭是不是在發瘋", "笑死，這群沒一個正常的", "到底在吵什麼啦"]
+        topics: ["笑死，你們看這個", "嘿嘿，水源又要嘉恩了", "黃子庭是不是在發瘋", "到底在笑什麼啦"]
     },
     "王水源": {
-        fallbacks: ["假賽啦", "幹你娘會被你們害死", "無言", "好痛苦", "都可以啊"],
+        fallbacks: ["假賽啦", "幹你娘會被你們害死", "無言", "好痛苦", "過來 坐下"],
         keywords: { 
-            "嘉恩": "我先修理她，媽的想找個正常人交往好難", 
-            "錢": "收一下門票錢，為了我的錢包謝謝", 
-            "股票": "旺宏亮燈兩天了，有人還在車上嗎",
-            "子庭": "子庭滿適合去中國發展的啊，霸道總裁",
-            "不信": "你不信？我才不信你會還錢"
+            "嘉恩": "我先修理她，媽的想找個正常人交往好難，我還是想跟她去東京", 
+            "錢": "收一下迪士尼門票錢，為了我的錢包謝謝大家", 
+            "股票": "旺宏亮燈兩天了，有人還在車上嗎？爛貨，不然虧更多＝＝",
+            "帥": "你長得很像中國幹片裡的霸道總裁，又高又帥全身黑，顧北辰",
+            "顧北辰": "顧北辰就是那個抖音影片，過來，坐下",
+            "修理": "用屌修理，相信我，我現在做得到 @黃子庭 Troy"
         },
-        topics: ["我好痛苦", "嘉恩這女人真的沒救", "顧北辰，又高又帥全身黑", "旺宏亮燈兩天了，準備跳車"]
+        topics: ["我好痛苦", "嘉恩這女人真的沒救", "旺宏亮燈兩天了", "顧北辰，又高又帥全身黑"]
     },
     "黃子庭 Troy": {
-        fallbacks: ["白癡", "操你媽", "小硬", "Fuckable", "煩都煩死", "三條細狗"],
+        fallbacks: ["白癡喔", "操你媽", "小硬", "Fuckable", "煩都煩死", "三條細狗"],
         keywords: { 
-            "機票": "改來改去操他媽，浪費我錢", 
-            "正常": "你算幸運了，我這邊沒一個正常的", 
+            "機票": "改來改去操他媽，浪費我多少錢，18年她們贏了", 
             "怒": "如果你是想激怒我，恭喜你，你成功了",
-            "水源": "水源除了嘉恩還會聊什麼？",
-            "顧北辰": "霸你媽，你才顧北辰"
+            "南勢角": "大家明天南勢角集合，不准耍大牌 @熊剛剛Jimmy",
+            "局外人": "為什麼只有我是局外人？我跟她出來沒以前開心了",
+            "大陸": "我適合去中國發展嗎？大陸人資料管家拿來沒 @Gee Homie"
         },
         topics: ["白癡喔", "為什麼只有我是局外人", "操你媽機票改來改去", "你們這群細狗"]
     },
     "Gee Homie": {
-        fallbacks: ["愛了", "不愛了", "三小啦", "行", "好慘會被遣返"],
+        fallbacks: ["愛了", "不愛了", "三小啦", "行", "笑死", "真·乾爹"],
         keywords: { 
-            "約": "明天晚上集合，幾點到吳興街？", 
-            "吃啥": "看要吃啥都行除了火鍋", 
-            "資料": "管家，三分鐘之內我要娶大陸人全部的資料",
+            "約": "明天晚上集合，幾點到吳興街？慢來吃東西不揪？", 
+            "資料": "管家，三分鐘之內我要娶大陸人全部的資料 @王水源",
             "遣返": "好慘會被遣返，真的愛了",
-            "嘉恩": "管家，三分鐘內我要嘉恩的資料"
+            "通知": "這是通知不是商量，懂？",
+            "漢堡": "我選了這間漢堡，我爸喜歡吃"
         },
-        topics: ["三小啦", "慢來，吃東西不揪？", "這是通知不是商量", "真·乾爹在此"]
+        topics: ["三小啦", "行", "這是通知不是商量", "管家，三分鐘之內..."]
     }
 };
 
@@ -101,46 +101,38 @@ function initChat() {
     if(config.mode === 'single') config.target = val.replace('single_', '');
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "連線成功。群組成員進入瘋狂互噴模式。", "bot");
+    addMsg("系統", "連線成功。素材庫已更新，高頻連鎖模式啟動。", "bot");
     if(config.mode === 'group') resetAutoTimer();
 }
 
-// 遞歸掃描：讓對話產生連鎖反應
 function scanForReaction(sender, text) {
     if (config.mode !== 'group') return;
-
-    // 隨機打亂檢查順序，讓接話的人不固定
     const names = Object.keys(friends).filter(n => n !== sender).sort(() => Math.random() - 0.5);
 
     for (let name of names) {
         for (let key in friends[name].keywords) {
-            if (text.includes(key)) {
-                // 提高觸發機率至 95%
+            if (text.includes(key) || text.includes(`@${name}`)) {
                 if (Math.random() < 0.95) {
                     setTimeout(() => {
-                        addMsg(name, friends[name].keywords[key], "bot");
-                    }, 400 + Math.floor(Math.random() * 800)); // 縮短互噴延遲
+                        addMsg(name, friends[name].keywords[key] || friends[name].fallbacks[0], "bot");
+                    }, 500 + Math.floor(Math.random() * 800));
                 }
-                return; // 每次掃描只觸發一個，但 addMsg 會再次呼叫此函式形成遞歸
+                return;
             }
         }
     }
-
-    // 如果沒有關鍵字，但隨機 30% 機率會有人出來講 fallback (吐槽)
-    if (Math.random() < 0.3) {
+    // 隨機吐槽機率
+    if (Math.random() < 0.25) {
         setTimeout(() => {
             const rName = names[Math.floor(Math.random() * names.length)];
-            const fallback = friends[rName].fallbacks[Math.floor(Math.random() * friends[rName].fallbacks.length)];
-            addMsg(rName, fallback, "bot");
-        }, 1200);
+            addMsg(rName, friends[rName].fallbacks[Math.floor(Math.random() * friends[rName].fallbacks.length)], "bot");
+        }, 1500);
     }
 }
 
 function resetAutoTimer() {
     if(autoTimer) clearTimeout(autoTimer);
-    // 提高自發聊天頻率 (2-6秒)
-    const nextInterval = 2000 + Math.floor(Math.random() * 4000);
-    
+    const nextInterval = 3000 + Math.floor(Math.random() * 5000);
     autoTimer = setTimeout(() => {
         if(config.mode === 'group') {
             const name = Object.keys(friends)[Math.floor(Math.random() * 4)];
@@ -155,16 +147,13 @@ function doSend() {
     const input = document.getElementById('userInput');
     const text = input.value.trim();
     if(!text) return;
-
     addMsg("你", text, "user");
     input.value = "";
     resetAutoTimer();
-
     setTimeout(() => {
         let name = config.mode === 'single' ? config.target : Object.keys(friends)[Math.floor(Math.random()*4)];
-        let reply = getReply(name, text);
-        addMsg(name, reply, "bot");
-    }, 400 + Math.floor(Math.random() * 800));
+        addMsg(name, getReply(name, text), "bot");
+    }, 600);
 }
 
 function getReply(name, input) {
@@ -183,11 +172,7 @@ function addMsg(sender, text, type) {
     d.innerHTML = `${nameHtml}${text}`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
-
-    // 核心邏輯：每發一條訊息，就掃描一次有沒有人要接話
-    if (type === 'bot' && sender !== "系統") {
-        scanForReaction(sender, text);
-    }
+    if (type === 'bot' && sender !== "系統") scanForReaction(sender, text);
 }
 </script>
 </body>
