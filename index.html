@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>新店顏家 - 模擬聊天群組</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
+        #setup { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        #chat-container { display: none; width: 100%; max-width: 450px; height: 90vh; background: #84a1c1; flex-direction: column; }
+        #status-bar { background: rgba(0,0,0,0.1); padding: 5px 15px; font-size: 12px; color: white; }
+        #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
+        .msg { margin-bottom: 12px; padding: 8px 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; max-width: 75%; position: relative; }
+        .msg.bot { background: white; align-self: flex-start; border-top-left-radius: 2px; }
+        .msg.user { background: #95ec69; align-self: flex-end; border-top-right-radius: 2px; }
+        .name { font-size: 11px; color: #555; margin-bottom: 3px; font-weight: bold; }
+        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; }
+        button { background: #00c300; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
+        select { padding: 8px; border-radius: 5px; margin: 10px 0; width: 100%; }
+    </style>
+</head>
+<body>
+
+<div id="setup">
+    <h2>新店顏家 模擬器</h2>
+    <p>請選擇聊天模式：</p>
+    <select id="mode">
+        <option value="group">全體群組 (隨機回覆)</option>
+        <option value="single_熊剛剛Jimmy">單挑：熊剛剛Jimmy</option>
+        <option value="single_王水源">單挑：王水源</option>
+        <option value="single_黃子庭 Troy">單挑：黃子庭 Troy</option>
+        <option value="single_Gee Homie">單挑：Gee Homie</option>
+    </select>
+    <br>
+    <button onclick="initChat()">進入群組</button>
+</div>
+
+<div id="chat-container">
+    <div id="status-bar">新店顏家 (4)</div>
+    <div id="messages"></div>
+    <div class="input-box">
+        <input type="text" id="userInput" placeholder="輸入訊息..." onkeypress="if(event.keyCode==13) doSend()">
+        <button onclick="doSend()">傳送</button>
+    </div>
+</div>
+
+<script>
+const friends = {
+    "熊剛剛Jimmy": {
+        fallbacks: ["笑死", "尊都假嘟", "我不信", "牛逼", "好扯"],
+        keywords: {
+            "分手": "風險對沖加槓桿的概念，真的",
+            "加班": "我也是可以耍大牌直接走人啦",
+            "睡": "大半夜不睡覺在這邊吵"
+        }
+    },
+    "王水源": {
+        fallbacks: ["圖片", "影片", "都可以啊", "假賽啦", "幹你娘會被你們害死"],
+        keywords: {
+            "嘉恩": "我先修理她，媽的想找個正常人交往好難",
+            "錢": "收一下迪士尼門票錢，為了我的錢包謝謝",
+            "痛苦": "我今天跟我媽分享我的痛苦"
+        }
+    },
+    "黃子庭 Troy": {
+        fallbacks: ["白癡", "操你媽", "小硬", "Fuckable", "煩都煩死"],
+        keywords: {
+            "機票": "改來改去操他媽，浪費我錢",
+            "正常": "你算幸運了，我這邊沒一個正常的",
+            "贏了": "她們贏了，18年"
+        }
+    },
+    "Gee Homie": {
+        fallbacks: ["愛了", "不愛了", "三小啦", "行", "笑死"],
+        keywords: {
+            "約": "明天晚上集合，幾點到吳興街？",
+            "吃啥": "看要吃啥都行除了火鍋",
+            "資料": "三分鐘之內我要娶大陸人全部的資料"
+        }
+    }
+};
+
+let config = { mode: 'group', target: null };
+
+function initChat() {
+    const val = document.getElementById('mode').value;
+    if(val === 'group') {
+        config.mode = 'group';
+    } else {
+        config.mode = 'single';
+        config.target = val.replace('single_', '');
+    }
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('chat-container').style.display = 'flex';
+    addMsg("系統", "已進入群組對話", "bot");
+}
+
+function doSend() {
+    const input = document.getElementById('userInput');
+    const text = input.value.trim();
+    if(!text) return;
+
+    addMsg("你", text, "user");
+    input.value = "";
+
+    // 隨機延遲 500ms ~ 2500ms
+    const delay = 500 + Math.floor(Math.random() * 2000);
+    const status = document.getElementById('status-bar');
+    status.innerText = "💬 有人正在輸入...";
+
+    setTimeout(() => {
+        let name = config.mode === 'single' ? config.target : Object.keys(friends)[Math.floor(Math.random()*4)];
+        let reply = getReply(name, text);
+        addMsg(name, reply, "bot");
+        status.innerText = config.mode === 'group' ? "新店顏家 (4)" : `與 ${name} 對話中`;
+    }, delay);
+}
+
+function getReply(name, input) {
+    const data = friends[name];
+    const hour = new Date().getHours();
+
+    // 時效性：深夜加成
+    if (hour >= 1 && hour <= 6 && Math.random() > 0.5) return "大半夜不睡覺...";
+
+    // 關鍵字匹配
+    for (let key in data.keywords) {
+        if (input.includes(key)) return data.keywords[key];
+    }
+
+    // 隨機回覆
+    return data.fallbacks[Math.floor(Math.random() * data.fallbacks.length)];
+}
+
+function addMsg(sender, text, type) {
+    const box = document.getElementById('messages');
+    const d = document.createElement('div');
+    d.className = `msg ${type}`;
+    d.innerHTML = `<div class="name">${sender}</div>${text}`;
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+}
+</script>
+</body>
+</html>
