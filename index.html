@@ -5,42 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>新店顏家 - 模擬聊天群組</title>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #setup { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        #chat-container { display: none; width: 100%; max-width: 450px; height: 90vh; background: #84a1c1; flex-direction: column; }
-        #status-bar { background: rgba(0,0,0,0.1); padding: 5px 15px; font-size: 12px; color: white; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        #setup { background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 300px; }
+        #chat-container { display: none; width: 100%; max-width: 500px; height: 100vh; background: #84a1c1; flex-direction: column; }
+        #status-bar { background: rgba(0,0,0,0.15); padding: 10px 15px; font-size: 13px; color: white; font-weight: bold; }
         #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
-        .msg { margin-bottom: 12px; padding: 8px 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; max-width: 75%; position: relative; }
+        .msg { margin-bottom: 12px; padding: 8px 12px; border-radius: 15px; font-size: 14px; line-height: 1.4; max-width: 75%; position: relative; word-wrap: break-word; }
         .msg.bot { background: white; align-self: flex-start; border-top-left-radius: 2px; }
         .msg.user { background: #95ec69; align-self: flex-end; border-top-right-radius: 2px; }
-        .name { font-size: 11px; color: #555; margin-bottom: 3px; font-weight: bold; }
-        .input-box { background: #fff; padding: 10px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
-        input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 8px 15px; outline: none; }
-        button { background: #00c300; color: white; border: none; padding: 8px 20px; border-radius: 20px; cursor: pointer; }
-        select { padding: 8px; border-radius: 5px; margin: 10px 0; width: 100%; }
+        .name { font-size: 11px; color: #444; margin-bottom: 3px; font-weight: bold; }
+        .input-box { background: #fff; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 20px; padding: 10px 15px; outline: none; }
+        button { background: #00c300; color: white; border: none; padding: 0 20px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        select { padding: 10px; border-radius: 5px; margin: 15px 0; width: 100%; border: 1px solid #ccc; }
     </style>
 </head>
 <body>
 
 <div id="setup">
     <h2>新店顏家 模擬器</h2>
-    <p>請選擇聊天模式：</p>
+    <p>選擇聊天模式：</p>
     <select id="mode">
-        <option value="group">全體群組 (隨機回覆)</option>
-        <option value="single_熊剛剛Jimmy">單挑：熊剛剛Jimmy</option>
-        <option value="single_王水源">單挑：王水源</option>
-        <option value="single_黃子庭 Troy">單挑：黃子庭 Troy</option>
+        <option value="group">全體群組 (自發聊天 ON)</option>
+        <option value="single_熊剛剛Jimmy">單聊：熊剛剛Jimmy</option>
+        <option value="single_王水源">單聊：王水源</option>
+        <option value="single_黃子庭 Troy">單聊：黃子庭 Troy</option>
         <option value="single_Gee Homie">單挑：Gee Homie</option>
     </select>
-    <br>
-    <button onclick="initChat()">進入群組</button>
+    <button onclick="initChat()" style="width: 100%; padding: 10px;">進入聊天</button>
 </div>
 
 <div id="chat-container">
-    <div id="status-bar">新店顏家 (4)</div>
+    <div id="status-bar" id="typing-indicator">新店顏家 (4)</div>
     <div id="messages"></div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="輸入訊息..." onkeypress="if(event.keyCode==13) doSend()">
+        <input type="text" id="userInput" placeholder="傳送訊息..." onkeypress="if(event.keyCode==13) doSend()">
         <button onclick="doSend()">傳送</button>
     </div>
 </div>
@@ -48,52 +47,97 @@
 <script>
 const friends = {
     "熊剛剛Jimmy": {
-        fallbacks: ["笑死", "尊都假嘟", "我不信", "牛逼", "好扯"],
-        keywords: {
-            "分手": "風險對沖加槓桿的概念，真的",
-            "加班": "我也是可以耍大牌直接走人啦",
-            "睡": "大半夜不睡覺在這邊吵"
-        }
+        fallbacks: ["笑死", "尊都假嘟", "我不信", "牛逼", "好扯", "到底"],
+        keywords: { 
+            "分手": "風險對沖加槓桿的概念，真的", 
+            "睡": "大半夜不睡覺在這邊吵",
+            "不信": "那我就放心了",
+            "子庭": "他在那邊耍大牌吧"
+        },
+        topics: ["笑死，你們看這個", "嘿嘿，尊都假嘟", "到底在笑什麼啦", "好扯喔"]
     },
     "王水源": {
-        fallbacks: ["圖片", "影片", "都可以啊", "假賽啦", "幹你娘會被你們害死"],
-        keywords: {
-            "嘉恩": "我先修理她，媽的想找個正常人交往好難",
-            "錢": "收一下迪士尼門票錢，為了我的錢包謝謝",
-            "痛苦": "我今天跟我媽分享我的痛苦"
-        }
+        fallbacks: ["都可以啊", "假賽啦", "幹你娘會被你們害死", "無言", "好痛苦"],
+        keywords: { 
+            "嘉恩": "我先修理她，媽的想找個正常人交往好難", 
+            "錢": "收一下門票錢，為了我的錢包謝謝", 
+            "股票": "旺宏亮燈兩天了，有人還在車上嗎",
+            "帥": "你長得很像中國幹片裡的霸道總裁，顧北辰"
+        },
+        topics: ["我好痛苦", "媽的想找個正常人好好交往那麼難", "顧北辰，又高又帥全身黑", "旺宏亮燈兩天了，有人還在車上嗎"]
     },
     "黃子庭 Troy": {
-        fallbacks: ["白癡", "操你媽", "小硬", "Fuckable", "煩都煩死"],
-        keywords: {
-            "機票": "改來改去操他媽，浪費我錢",
-            "正常": "你算幸運了，我這邊沒一個正常的",
-            "贏了": "她們贏了，18年"
-        }
+        fallbacks: ["白癡", "操你媽", "小硬", "Fuckable", "煩都煩死", "三條細狗"],
+        keywords: { 
+            "機票": "改來改去操他媽，浪費我錢", 
+            "正常": "你算幸運了，我這邊沒一個正常的", 
+            "怒": "如果你是想激怒我，恭喜你，你成功了",
+            "大陸": "怎麼說，我適合去中國發展嗎"
+        },
+        topics: ["白癡喔", "為什麼只有我是局外人", "操你媽改來改去", "三條細狗", "如果你是想激怒我，恭喜你"]
     },
     "Gee Homie": {
-        fallbacks: ["愛了", "不愛了", "三小啦", "行", "笑死"],
-        keywords: {
-            "約": "明天晚上集合，幾點到吳興街？",
-            "吃啥": "看要吃啥都行除了火鍋",
-            "資料": "三分鐘之內我要娶大陸人全部的資料"
-        }
+        fallbacks: ["愛了", "不愛了", "三小啦", "行", "笑死", "好慘會被遣返"],
+        keywords: { 
+            "約": "明天晚上集合，幾點到吳興街？", 
+            "吃啥": "看要吃啥都行除了火鍋", 
+            "資料": "管家，三分鐘之內我要娶大陸人全部的資料",
+            "乾爹": "這是通知不是商量"
+        },
+        topics: ["三小啦", "慢來，吃東西不揪？", "行", "愛了", "這是通知不是商量", "真·乾爹"]
     }
 };
 
 let config = { mode: 'group', target: null };
+let autoTimer = null;
 
 function initChat() {
     const val = document.getElementById('mode').value;
-    if(val === 'group') {
-        config.mode = 'group';
-    } else {
-        config.mode = 'single';
-        config.target = val.replace('single_', '');
-    }
+    config.mode = val === 'group' ? 'group' : 'single';
+    if(config.mode === 'single') config.target = val.replace('single_', '');
+    
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "已進入群組對話", "bot");
+    addMsg("系統", "連線成功。", "bot");
+
+    if(config.mode === 'group') resetAutoTimer();
+}
+
+// 80% 機率引發連鎖反應
+function triggerChainReaction(excludeName) {
+    if (Math.random() > 0.8) return; 
+
+    const others = Object.keys(friends).filter(n => n !== excludeName);
+    const reactor = others[Math.floor(Math.random() * others.length)];
+    
+    setTimeout(() => {
+        const reply = friends[reactor].fallbacks[Math.floor(Math.random() * friends[reactor].fallbacks.length)];
+        addMsg(reactor, reply, "bot");
+
+        // 二次連鎖機率
+        if(Math.random() < 0.4) {
+            setTimeout(() => {
+                const third = others.filter(n => n !== reactor)[Math.floor(Math.random() * 2)];
+                const secondReply = friends[third].fallbacks[Math.floor(Math.random() * friends[third].fallbacks.length)];
+                addMsg(third, secondReply, "bot");
+            }, 700);
+        }
+    }, 600);
+}
+
+function resetAutoTimer() {
+    if(autoTimer) clearTimeout(autoTimer);
+    const nextInterval = 4000 + Math.floor(Math.random() * 6000); // 4-10秒自發一次
+    
+    autoTimer = setTimeout(() => {
+        if(config.mode === 'group') {
+            const name = Object.keys(friends)[Math.floor(Math.random() * 4)];
+            const topic = friends[name].topics[Math.floor(Math.random() * friends[name].topics.length)];
+            addMsg(name, topic, "bot");
+            triggerChainReaction(name);
+        }
+        resetAutoTimer();
+    }, nextInterval);
 }
 
 function doSend() {
@@ -103,9 +147,9 @@ function doSend() {
 
     addMsg("你", text, "user");
     input.value = "";
+    resetAutoTimer();
 
-    // 隨機延遲 500ms ~ 2500ms
-    const delay = 500 + Math.floor(Math.random() * 2000);
+    const delay = 500 + Math.floor(Math.random() * 1200);
     const status = document.getElementById('status-bar');
     status.innerText = "💬 有人正在輸入...";
 
@@ -114,22 +158,16 @@ function doSend() {
         let reply = getReply(name, text);
         addMsg(name, reply, "bot");
         status.innerText = config.mode === 'group' ? "新店顏家 (4)" : `與 ${name} 對話中`;
+        
+        if(config.mode === 'group') triggerChainReaction(name);
     }, delay);
 }
 
 function getReply(name, input) {
     const data = friends[name];
-    const hour = new Date().getHours();
-
-    // 時效性：深夜加成
-    if (hour >= 1 && hour <= 6 && Math.random() > 0.5) return "大半夜不睡覺...";
-
-    // 關鍵字匹配
     for (let key in data.keywords) {
         if (input.includes(key)) return data.keywords[key];
     }
-
-    // 隨機回覆
     return data.fallbacks[Math.floor(Math.random() * data.fallbacks.length)];
 }
 
@@ -137,7 +175,8 @@ function addMsg(sender, text, type) {
     const box = document.getElementById('messages');
     const d = document.createElement('div');
     d.className = `msg ${type}`;
-    d.innerHTML = `<div class="name">${sender}</div>${text}`;
+    const nameHtml = type === 'bot' ? `<div class="name">${sender}</div>` : '';
+    d.innerHTML = `${nameHtml}${text}`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
 }
