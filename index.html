@@ -11,7 +11,7 @@
         #chat-container { display: none; width: 100%; max-width: 500px; height: 100vh; background: #84a1c1; flex-direction: column; }
         #status-bar { background: rgba(0,0,0,0.2); padding: 12px; color: white; font-weight: bold; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
-        .msg { margin-bottom: 12px; padding: 10px 14px; border-radius: 18px; font-size: 14.5px; line-height: 1.5; max-width: 80%; position: relative; }
+        .msg { margin-bottom: 12px; padding: 10px 14px; border-radius: 18px; font-size: 14.5px; line-height: 1.5; max-width: 80%; }
         .msg.bot { background: white; align-self: flex-start; border-top-left-radius: 2px; }
         .msg.user { background: #95ec69; align-self: flex-end; border-top-right-radius: 2px; }
         .name { font-size: 11px; color: #555; margin-bottom: 4px; font-weight: bold; }
@@ -26,10 +26,9 @@
 
 <div id="setup">
     <div class="slogan">唯一支持安家軍</div>
-    <p style="color: #666; font-size: 13px;">請輸入安家軍授權碼 (Gemini API Key) 以啟動</p>
-    <input type="password" id="apiKeyInput" class="key-input" placeholder="在此貼上你的 API Key">
-    <button onclick="initChat()" style="width: 100%; padding: 15px; font-size: 16px; background: #ff4d4d; border-radius: 25px; color: white; border: none; cursor: pointer; font-weight: bold;">進入群組</button>
-    <p style="font-size: 11px; color: #999; margin-top: 15px;">Key 將僅儲存於您的瀏覽器中</p>
+    <p style="color: #666; font-size: 13px;">請輸入授權碼 (Gemini API Key)</p>
+    <input type="password" id="apiKeyInput" class="key-input" placeholder="貼上 API Key">
+    <button onclick="initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; border-radius: 25px; color: white; border: none; cursor: pointer; font-weight: bold;">進入群組</button>
 </div>
 
 <div id="chat-container">
@@ -37,7 +36,7 @@
     <div id="messages"></div>
     <div id="typing-indicator" class="typing">安家軍正在打字...</div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="輸入：Alia, 菜刀安, 嘉恩, 止損..." onkeypress="if(event.keyCode==13) doSend()">
+        <input type="text" id="userInput" placeholder="隨便聊聊，看看誰會噴你..." onkeypress="if(event.keyCode==13) doSend()">
         <button onclick="doSend()">傳送</button>
     </div>
 </div>
@@ -46,8 +45,10 @@
 let CURRENT_API_KEY = localStorage.getItem("anjia_key") || "";
 
 const systemPrompt = `
-你是「新店顏家」群組的後台，請挑選最適合的角色回覆：
-1. 熊剛剛Jimmy：理財魔人。梗：風險對沖、止損、四川媳婦不用改機票、笑死。
+你現在是台灣熱門群組「新店顏家」的 AI 判別器。
+請根據使用者的輸入，挑選最適合回話的一位，並模仿他的靈魂語氣回覆。
+
+1. 熊剛剛Jimmy：理財魔人。梗：風險對沖、止損、四川媳婦不用改機票、沒看到菜刀硬不起來。口頭禪：笑死、到底是。
 2. 王水源：憂慮苦主。梗：嘉恩不回訊息好痛苦、找正常人交往、微風求婚、旺宏亮燈。口頭禪：好痛苦、假賽啦。
 3. 黃子庭 Troy：火爆老闆。梗：菜刀安(恰吉)沒看到硬不起來、Alia嫌他品味、周旋到早上7點。口頭禪：細狗、操你媽、有人在乎我的感受嗎。
 4. Gee Homie：奢華大課長。梗：Cartier客戶、求婚沒鑽失敗、娶大陸人、通知不是商量。口頭禪：愛了、我不信。
@@ -55,38 +56,43 @@ const systemPrompt = `
 格式：角色名|回覆內容
 `;
 
-// 檢查是否已有儲存的 Key，有則自動填入
 if(CURRENT_API_KEY) {
     document.getElementById('apiKeyInput').value = CURRENT_API_KEY;
 }
 
 async function getAIReply(userText) {
+    // 修正後的路徑：使用 v1beta 並確保模型名稱正確
+    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CURRENT_API_KEY}`;
+    
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CURRENT_API_KEY}`, {
+        const response = await fetch(apiURL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: systemPrompt + "\n使用者輸入：" + userText }] }]
+                contents: [{ parts: [{ text: systemPrompt + "\n使用者說：" + userText }] }]
             })
         });
+        
         const data = await response.json();
-        if (data.error) throw new Error(data.error.message);
+        
+        if (data.error) {
+            return `系統|錯誤：${data.error.message}`;
+        }
+        
         return data.candidates[0].content.parts[0].text.trim();
     } catch (e) {
-        return `系統|API Key 錯誤或失效：${e.message}`;
+        return `系統|連線失敗：${e.message}`;
     }
 }
 
 function initChat() {
     const key = document.getElementById('apiKeyInput').value.trim();
-    if(!key) { alert("請輸入有效的 API Key"); return; }
-    
+    if(!key) { alert("請輸入 API Key"); return; }
     CURRENT_API_KEY = key;
-    localStorage.setItem("anjia_key", key); // 儲存在本地，下次免輸入
-    
+    localStorage.setItem("anjia_key", key);
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "連線成功。唯一支持安家軍！AI 核心已載入。", "bot");
+    addMsg("系統", "唯一支持安家軍！AI 引擎已修正並啟動。", "bot");
 }
 
 async function doSend() {
