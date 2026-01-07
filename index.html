@@ -25,16 +25,16 @@
 
 <div id="setup">
     <div class="slogan">唯一支持安家軍</div>
-    <p style="color: #666; font-size: 13px;">AI 模型：Gemini 2.0 Flash (最新版)</p>
-    <button onclick="window.initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; border-radius: 25px; color: white; border: none; cursor: pointer; font-weight: bold;">開始靈魂對談</button>
+    <p style="color: #666; font-size: 13px;">核心已連接：Gemini 1.5 Flash</p>
+    <button onclick="window.initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; border-radius: 25px; color: white; border: none; cursor: pointer; font-weight: bold;">啟動靈魂對談</button>
 </div>
 
 <div id="chat-container">
-    <div id="status-bar">新店顏家 - AI 模式 (SDK 2.0)</div>
+    <div id="status-bar">新店顏家 (AI 旗艦版)</div>
     <div id="messages"></div>
     <div id="typing-indicator" class="typing">安家軍正在打字...</div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="隨便聊聊，看看誰會噴你..." onkeypress="if(event.keyCode==13) window.doSend()">
+        <input type="text" id="userInput" placeholder="輸入關鍵字聊聊..." onkeypress="if(event.keyCode==13) window.doSend()">
         <button onclick="window.doSend()">傳送</button>
     </div>
 </div>
@@ -50,27 +50,26 @@
 <script type="module">
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const API_KEY = "AIzaSyAOayzw7l-gKRbwDb0SOruWqT2-Gkzd6Jo";
+// 使用你提供的最新 API KEY
+const API_KEY = "AIzaSyAx7J-kzIuStm8mlKEYsd0U_opB2t2ZrtM";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
 const systemPrompt = `
-你是台灣LINE群組「新店顏家」的後台。請根據輸入挑選最適合的角色回覆。
-性格設定：
-1. 熊剛剛Jimmy：自認理財高手，愛聊「風險對沖、止損」。口頭禪「笑死、到底是、望周知」。最近承認資料庫只有20句，想開發手遊騙Gee Homie課金，然後叫對方請尾牙。
-2. 王水源：群組苦主。核心：嘉恩焦慮症。嘉恩不回訊息就「好痛苦、無言、五味雜陳」。支持帶黃子庭前女友「菜刀安」去Halloween裝扮恰吉。
-3. 黃子庭 Troy：霸道總裁但沒人理。前女友菜刀安(恰吉)讓他陰影重重。Alia嫌他選的東西「一無是處」。口頭禪「操你媽、細狗、有人在乎我的感受嗎」。
-4. Gee Homie：真·乾爹。Cartier大客戶，通知不是商量。是課長，愛打傳說，喜歡推薦殺時間手遊。
+你是LINE群組「新店顏家」的後台。請根據輸入挑選最適合的角色回覆。
+性格與背景：
+1. 熊剛剛Jimmy：笑死、風險對沖、止損。最近承認自己資料庫只有20句，想寫手遊騙Gee Homie課金。
+2. 王水源：嘉恩焦慮症。嘉恩不回訊息就「好痛苦、無言、五味雜陳」。支持帶菜刀安（黃子庭前女友）去裝扮恰吉。
+3. 黃子庭 Troy：操你媽、細狗、有人在乎我的感受嗎。前女友菜刀安是禁忌。Alia嫌他品味一無是處。
+4. Gee Homie：真·乾爹、課長、Cartier客戶、通知不是商量。喜歡打傳說，叫Jimmy尾牙要請客。
 
-規則：
-- 角色名|回覆內容
-- 語氣要像真人互噴，不准有AI腔。
+格式：角色名|回覆內容
+語氣：直男、互噴、簡短。
 `;
 
 async function getAIReply(userText) {
     try {
-        const model = genAI.getGenerativeModel({ 
-            model: "gemini-2.0-flash-exp" // 使用最新 2.0 預覽版
-        });
+        // 設定模型為 1.5 Flash 確保配額穩定
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const result = await model.generateContent({
             contents: [{ role: "user", parts: [{ text: systemPrompt + "\n使用者說：" + userText }] }],
@@ -83,14 +82,17 @@ async function getAIReply(userText) {
         const response = await result.response;
         return response.text().trim();
     } catch (e) {
-        return `系統|模型連線異常：${e.message}`;
+        if (e.message.includes("429")) {
+            return `熊剛剛Jimmy|笑死，API 配額爆了，這把 Key 剛才噴太兇，等 30 秒再說。`;
+        }
+        return `系統|錯誤：${e.message}`;
     }
 }
 
 window.initChat = () => {
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "已連接至 Gemini 2.0 模型。安家軍已準備好噴人。", "bot");
+    addMsg("系統", "唯一支持安家軍！SDK 已就緒。", "bot");
 };
 
 window.doSend = async () => {
@@ -109,7 +111,7 @@ window.doSend = async () => {
         const [name, content] = aiResult.split('|');
         addMsg(name.trim(), content.trim(), "bot");
     } else {
-        addMsg("系統回報", aiResult, "bot");
+        addMsg("系統", aiResult, "bot");
     }
 };
 
