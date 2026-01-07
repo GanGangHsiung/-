@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新店顏家 - 安家軍 AI 旗艦版</title>
+    <title>新店顏家 - 安家軍 AI 最終版</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         #setup { background: white; padding: 40px 30px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 340px; }
@@ -19,66 +19,66 @@
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
         button { background: #00c300; color: white; border: none; padding: 0 22px; border-radius: 25px; cursor: pointer; font-weight: bold; }
         .typing { font-style: italic; color: #eee; font-size: 12px; margin-bottom: 10px; padding-left: 15px; display: none; }
-        .key-input { width: 90%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid #ddd; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="setup">
     <div class="slogan">唯一支持安家軍</div>
-    <p style="color: #666; font-size: 13px;">請輸入授權碼 (Gemini API Key)</p>
-    <input type="password" id="apiKeyInput" class="key-input" placeholder="貼上 API Key">
+    <p style="color: #666; font-size: 13px;">AI 引擎與語氣過濾解鎖中...</p>
     <button onclick="initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; border-radius: 25px; color: white; border: none; cursor: pointer; font-weight: bold;">進入群組</button>
 </div>
 
 <div id="chat-container">
-    <div id="status-bar">新店顏家 - 靈魂 AI 模式</div>
+    <div id="status-bar">新店顏家 - 靈魂 AI 模式 (Gemini 1.5)</div>
     <div id="messages"></div>
-    <div id="typing-indicator" class="typing">安家軍正在打字...</div>
+    <div id="typing-indicator" class="typing">安家軍正在輸入...</div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="隨便聊聊，看看誰會噴你..." onkeypress="if(event.keyCode==13) doSend()">
+        <input type="text" id="userInput" placeholder="輸入關鍵字聊聊..." onkeypress="if(event.keyCode==13) doSend()">
         <button onclick="doSend()">傳送</button>
     </div>
 </div>
 
 <script>
-let CURRENT_API_KEY = localStorage.getItem("anjia_key") || "";
+// 使用你提供的最新 API KEY
+const API_KEY = "AIzaSyAOayzw7l-gKRbwDb0SOruWqT2-Gkzd6Jo";
 
 const systemPrompt = `
-你現在是台灣熱門群組「新店顏家」的 AI 判別器。
-請根據使用者的輸入，挑選最適合回話的一位，並模仿他的靈魂語氣回覆。
-
-1. 熊剛剛Jimmy：理財魔人。梗：風險對沖、止損、四川媳婦不用改機票、沒看到菜刀硬不起來。口頭禪：笑死、到底是。
-2. 王水源：憂慮苦主。梗：嘉恩不回訊息好痛苦、找正常人交往、微風求婚、旺宏亮燈。口頭禪：好痛苦、假賽啦。
-3. 黃子庭 Troy：火爆老闆。梗：菜刀安(恰吉)沒看到硬不起來、Alia嫌他品味、周旋到早上7點。口頭禪：細狗、操你媽、有人在乎我的感受嗎。
-4. Gee Homie：奢華大課長。梗：Cartier客戶、求婚沒鑽失敗、娶大陸人、通知不是商量。口頭禪：愛了、我不信。
+你是「新店顏家」群組的後台判別器。請根據使用者輸入，挑選最適合的人回覆。
+性格設定：
+1. 熊剛剛Jimmy：理財魔人、止損、風險對沖、笑死。
+2. 王水源：苦主。嘉恩不回訊息、好痛苦、東京改期、旺宏亮燈。
+3. 黃子庭 Troy：火爆、細狗、操你媽、菜刀安、Alia嫌他品味。
+4. Gee Homie：Cartier客戶、通知不是商量、求婚沒鑽失敗。
 
 格式：角色名|回覆內容
 `;
 
-if(CURRENT_API_KEY) {
-    document.getElementById('apiKeyInput').value = CURRENT_API_KEY;
-}
-
 async function getAIReply(userText) {
-    // 修正後的路徑：使用 v1beta 並確保模型名稱正確
-    const apiURL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CURRENT_API_KEY}`;
+    // 修正請求路徑為標準 v1 版本
+    const apiURL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
     
     try {
         const response = await fetch(apiURL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                contents: [{ parts: [{ text: systemPrompt + "\n使用者說：" + userText }] }]
+                contents: [{ parts: [{ text: systemPrompt + "\n使用者說：" + userText }] }],
+                // 加入安全性設定，避免屏蔽你們的口頭禪
+                safetySettings: [
+                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                ]
             })
         });
         
         const data = await response.json();
         
-        if (data.error) {
-            return `系統|錯誤：${data.error.message}`;
-        }
+        if (data.error) return `系統|錯誤：${data.error.message}`;
         
+        // 確保 AI 輸出符合格式
         return data.candidates[0].content.parts[0].text.trim();
     } catch (e) {
         return `系統|連線失敗：${e.message}`;
@@ -86,13 +86,9 @@ async function getAIReply(userText) {
 }
 
 function initChat() {
-    const key = document.getElementById('apiKeyInput').value.trim();
-    if(!key) { alert("請輸入 API Key"); return; }
-    CURRENT_API_KEY = key;
-    localStorage.setItem("anjia_key", key);
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "唯一支持安家軍！AI 引擎已修正並啟動。", "bot");
+    addMsg("系統", "唯一支持安家軍！AI 引擎已對準模型。", "bot");
 }
 
 async function doSend() {
@@ -109,9 +105,9 @@ async function doSend() {
 
     if (aiResult.includes('|')) {
         const [name, content] = aiResult.split('|');
-        addMsg(name, content, "bot");
+        addMsg(name.trim(), content.trim(), "bot");
     } else {
-        addMsg("系統", aiResult, "bot");
+        addMsg("系統回報", aiResult, "bot");
     }
 }
 
