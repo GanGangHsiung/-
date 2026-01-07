@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新店顏家 - 靈魂對話 3.0 (主動點火版)</title>
+    <title>新店顏家 - 安家軍出征模擬器</title>
     <style>
-        body { font-family: -apple-system, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #chat-container { width: 100%; max-width: 500px; height: 100vh; background: #84a1c1; display: flex; flex-direction: column; }
-        #status-bar { background: rgba(0,0,0,0.2); padding: 12px; color: white; font-weight: bold; text-align: center; }
+        body { font-family: -apple-system, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
+        #setup { background: white; padding: 40px 30px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 340px; }
+        .slogan { font-size: 24px; font-weight: 900; color: #ff4d4d; margin-bottom: 20px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        #chat-container { display: none; width: 100%; max-width: 500px; height: 100vh; background: #84a1c1; flex-direction: column; }
+        #status-bar { background: rgba(0,0,0,0.2); padding: 12px; color: white; font-weight: bold; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
         #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
         .msg { margin-bottom: 12px; padding: 10px 14px; border-radius: 18px; font-size: 14.5px; line-height: 1.5; max-width: 80%; }
         .msg.bot { background: white; align-self: flex-start; border-top-left-radius: 2px; }
@@ -15,16 +17,30 @@
         .name { font-size: 11px; color: #555; margin-bottom: 4px; font-weight: bold; }
         .input-box { background: #fff; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
-        button { background: #00c300; color: white; border: none; padding: 0 20px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        button { background: #00c300; color: white; border: none; padding: 0 22px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        select { width: 100%; padding: 10px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #ccc; font-size: 14px; }
     </style>
 </head>
 <body>
 
+<div id="setup">
+    <div class="slogan">唯一支持安家軍</div>
+    <p style="color: #666; font-size: 14px; margin-bottom: 25px;">素材庫：Alia / 菜刀安 / Cartier / 嘉恩</p>
+    <select id="mode">
+        <option value="group">🔊 進入顏家大群 (全體互噴)</option>
+        <option value="single_熊剛剛Jimmy">單聊：熊剛剛Jimmy (風險對沖)</option>
+        <option value="single_王水源">單聊：王水源 (嘉恩焦慮)</option>
+        <option value="single_黃子庭 Troy">單聊：黃子庭 Troy (菜刀與Alia)</option>
+        <option value="single_Gee Homie">單挑：Gee Homie (Cartier客戶)</option>
+    </select>
+    <button onclick="initChat()" style="width: 100%; padding: 15px; font-size: 16px;">開始聊天</button>
+</div>
+
 <div id="chat-container">
-    <div id="status-bar">新店顏家 (4) - 角色聯動模式</div>
+    <div id="status-bar">新店顏家 (4) - 唯一支持安家軍</div>
     <div id="messages"></div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="輸入關鍵字..." onkeypress="if(event.keyCode==13) doSend()">
+        <input type="text" id="userInput" placeholder="輸入關鍵字：Alia, 菜刀安, 分手..." onkeypress="if(event.keyCode==13) doSend()">
         <button onclick="doSend()">傳送</button>
     </div>
 </div>
@@ -32,60 +48,66 @@
 <script>
 const friends = {
     "熊剛剛Jimmy": {
-        fallbacks: ["笑死", "到底", "望周知", "尊都假嘟", "豪", "我不信"],
+        fallbacks: ["笑死", "風險對沖懂嗎", "止損啊大哥", "不信，肯定有外遇"],
         keywords: { 
-            "機票": "帶四川媳婦都不用改機票，省多少錢，妳們真的贏了",
-            "旺宏": "笑死，跌到三百多我一直加，@王水源 你的旺宏還在嗎？", // 主動點火
-            "純情": "我兄弟黃子庭很乖，身邊沒什麼異性，是我們裡面最純情的一個！",
-            "分手": "風險對沖加槓桿的概念，止損啊大哥",
-            "打傳說": "@Gee Homie 真·乾爹👟👟👟 很閒的話要不要打傳說？" // 主動點火
+            "求婚": "他的沒鑽失敗，@Gee Homie 鑽石才是風險對沖，槓桿開太大會翻車",
+            "結婚": "帶四川媳婦都不用改機票，省多少錢，妳們真的贏了",
+            "分手": "我早就說要分手，風險對沖加槓桿的概念，分了啦止損",
+            "菜刀安": "@黃子庭 Troy 兄弟，沒看到刀不安心，沒看到刀硬不起來",
+            "嘉恩": "水源又要開始痛苦了，笑死到底要聊幾次"
         },
-        topics: ["笑死，王水源又要聊嘉恩了", "黃子庭是不是在發瘋", "有人很閒的話要不要打傳說？", "望周知，我沒有朋友"]
+        topics: ["笑死，王水源又要聊嘉恩了", "黃子庭是不是又被菜刀安威脅了", "風險對沖，問就是越跌越買", "分手啦，不分留著過年？"]
     },
     "王水源": {
-        fallbacks: ["假賽啦", "好痛苦", "無言", "過來 坐下", "真假啦", "媽的"],
+        fallbacks: ["好痛苦", "想找個正常人交往好難", "無言", "假賽啦"],
         keywords: { 
-            "嘉恩": "媽的想找個正常人交往好難，我還是想跟她去東京改時間", 
-            "旺宏": "旺宏亮燈兩天了，有人還在車上嗎？爛貨＝＝",
-            "純情": "我兄弟黃子庭很乖...前女友是菜刀安，收到🫡",
-            "痛苦": "看了真是五味雜陳，@黃子庭 Troy 有人在乎我的感受嗎？", // 主動點火
-            "課金": "@Gee Homie 真·乾爹👟👟👟 你是大課長，尾牙要請我吧" // 主動點火
+            "嘉恩": "為啥嘉恩都不回我，不是在同一班機上嗎...我好痛苦",
+            "Alia": "Alia是人！但黃子庭你選的東西真的被嫌得一無是處，幫QQ",
+            "結婚": "想找個正常人結婚好難，我還是想跟嘉恩去東京，雖然改期了",
+            "求婚": "看到別人在迪士尼求婚，我改一下履歷，改成在微風求婚好了",
+            "分手": "分手好痛苦，但我已經沒有亂搞的本錢了，五味雜陳"
         },
-        topics: ["我好痛苦", "嘉恩這女人真的沒救", "旺宏亮燈兩天了，準備跳車", "顧北辰，又高又帥全身黑"]
+        topics: ["我好痛苦，嘉恩這女人真的沒救", "Alia是人，不是外勞", "找個正常人結婚那麼難嗎", "求婚是不是要看煙火"]
     },
     "黃子庭 Troy": {
-        fallbacks: ["白癡喔", "操你媽", "細狗", "Fuckable", "國道狂飆中", "算對也算不對"],
+        fallbacks: ["白癡喔", "有人在乎我的感受嗎", "細狗", "操你媽"],
         keywords: { 
-            "機票": "改來改去操他媽，浪費我多少錢，18年她們贏了", 
-            "感受": "有人在乎我的感受嗎？為什麼只有我是局外人？",
-            "純情": "完美。為了慶祝我表現優異，開酒來喝",
-            "分手": "@熊剛剛Jimmy 你是不是很閒，一直叫人分手", // 主動點火
-            "嘉恩": "水源，嘉恩這話題很危險喔" // 主動點火
+            "Alia": "Alia 嫌我選的東西一無是處...我好難過，有人在乎我的感受嗎？",
+            "菜刀安": "唯一支持菜刀安🔪🔪🔪！沒看到刀硬不起來",
+            "求婚": "古箏我就不撒這個謊了，反正講了你們也不會信，Cartier去死",
+            "分手": "真的分了啦，以圖為證！回去又要周旋到早上7點了",
+            "結婚": "嘴上說要結婚，還是一直亂搞...這就是我們，懂？"
         },
-        topics: ["白癡喔", "為什麼只有我是局外人", "操你媽機票改來改去", "你們這群細狗"]
+        topics: ["Alia為什麼要嫌我的品味", "沒看到菜刀安真的硬不起來", "為什麼只有我是局外人", "操你媽機票改來改去"]
     },
     "Gee Homie": {
-        fallbacks: ["愛了", "三小啦", "行", "笑死", "我不信", "這是在玩大地遊戲嗎"],
+        fallbacks: ["愛了", "三小啦", "行", "我不信"],
         keywords: { 
-            "約": "這是通知不是商量，懂？明天晚上集合", 
-            "資料": "管家，三分鐘之內我要娶大陸人全部的資料",
-            "傳說": "好啊，我是課長，讓你來客金",
-            "純情": "我做好萬全的準備了，只要你們不灌我酒",
-            "求婚": "他的沒有鑽，失敗。我現在是Cartier的客戶了"
+            "Cartier": "他的求婚沒有鑽，失敗。我現在是Cartier的客戶了，懂？",
+            "求婚": "求婚要嘛就是 Cartier，要嘛就是不要...嫂子實習當辣媽要快",
+            "分手": "分手？這是通知不是商量，懂？明天晚上集合喝分手酒",
+            "Alia": "不要戀戰，韓國有媳婦在等你，Alia真的分了嗎？我不信",
+            "菜刀安": "菜刀安直接冠軍，帶恰吉去 Halloween 就對了"
         },
-        topics: ["三小啦", "行", "這是通知不是商量", "Jimmy是不是很閒", "我是課長"]
+        topics: ["Cartier 客戶就是高級", "這是通知不是商量，我要結婚", "外遇三小啦", "我不信"]
     }
 };
 
-let lastSender = ""; // 防止自言自語的關鍵變數
+let lastSender = "";
 let autoTimer = null;
+let config = { mode: 'group', target: null };
 
 function initChat() {
-    addMsg("系統", "連線成功。角色聯動與防自言自語邏輯已載入。", "bot");
+    const val = document.getElementById('mode').value;
+    config.mode = val === 'group' ? 'group' : 'single';
+    if(config.mode === 'single') config.target = val.replace('single_', '');
+    
+    document.getElementById('setup').style.display = 'none';
+    document.getElementById('chat-container').style.display = 'flex';
+    addMsg("系統", "連線成功。唯一支持安家軍！話題素材已解鎖。", "bot");
     resetAutoTimer();
 }
 
-// 修改發話邏輯，確保不會連續同一個人
 function getNextResponder(excludeName) {
     const names = Object.keys(friends).filter(name => name !== excludeName);
     return names[Math.floor(Math.random() * names.length)];
@@ -93,37 +115,28 @@ function getNextResponder(excludeName) {
 
 async function handleReaction(sender, text) {
     const delay = (ms) => new Promise(res => setTimeout(res, ms));
-    
-    // 遍歷所有角色，看看有沒有人被點火（關鍵字觸發）
-    for (let name in friends) {
-        if (name === sender) continue; // 自己說的話不觸發自己
+    if (config.mode !== 'group') return;
 
+    for (let name in friends) {
+        if (name === sender) continue;
         for (let key in friends[name].keywords) {
             if (text.includes(key)) {
-                // 提高聯動機率 (85%)
-                if (Math.random() < 0.85) {
-                    await delay(800 + Math.random() * 1000);
+                if (Math.random() < 0.9) {
+                    await delay(800 + Math.random() * 1200);
                     addMsg(name, friends[name].keywords[key], "bot");
-                    return; // 觸發成功後跳出，防止多人同時搶話太亂
+                    return;
                 }
             }
         }
-    }
-
-    // 若無關鍵字聯動，隨機 30% 機率由「另一個人」吐槽
-    if (Math.random() < 0.3) {
-        const nextPerson = getNextResponder(sender);
-        await delay(1500);
-        addMsg(nextPerson, friends[nextPerson].fallbacks[Math.floor(Math.random() * friends[nextPerson].fallbacks.length)], "bot");
     }
 }
 
 function resetAutoTimer() {
     if(autoTimer) clearTimeout(autoTimer);
-    const nextInterval = 4000 + Math.floor(Math.random() * 6000);
-    
+    if(config.mode !== 'group') return;
+    const nextInterval = 6000 + Math.floor(Math.random() * 8000);
     autoTimer = setTimeout(() => {
-        const name = getNextResponder(lastSender); // 確保自發聊天的人不重複
+        const name = getNextResponder(lastSender);
         const topic = friends[name].topics[Math.floor(Math.random() * friends[name].topics.length)];
         addMsg(name, topic, "bot");
         resetAutoTimer();
@@ -139,10 +152,9 @@ function doSend() {
     input.value = "";
     resetAutoTimer();
 
-    // 隨機選一個人回覆你，但不能是「系統」
-    const firstResponder = getNextResponder(""); 
+    const responder = config.mode === 'single' ? config.target : getNextResponder("");
     setTimeout(() => {
-        addMsg(firstResponder, getReply(firstResponder, text), "bot");
+        addMsg(responder, getReply(responder, text), "bot");
     }, 600);
 }
 
@@ -162,17 +174,11 @@ function addMsg(sender, text, type) {
     d.innerHTML = `${nameHtml}${text}`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
-
-    if (type === 'bot') {
-        lastSender = sender; // 記錄最後發話的人
-        if (sender !== "系統") handleReaction(sender, text);
-    } else {
-        lastSender = "User";
-    }
+    if (type === 'bot' && sender !== "系統") {
+        lastSender = sender;
+        handleReaction(sender, text);
+    } else { lastSender = "User"; }
 }
-
-// 啟動
-initChat();
 </script>
 </body>
 </html>
