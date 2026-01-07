@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新店顏家 - 靈魂對話 2.0</title>
+    <title>新店顏家 - 自動社交版</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         #setup { background: white; padding: 40px 30px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 340px; }
-        .slogan { font-size: 26px; font-weight: 900; color: #ff4d4d; margin-bottom: 20px; }
         #chat-container { display: none; width: 100%; max-width: 500px; height: 100vh; background: #84a1c1; flex-direction: column; }
         #status-bar { background: rgba(0,0,0,0.2); padding: 12px; color: white; font-weight: bold; text-align: center; }
         #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
@@ -23,16 +22,16 @@
 <body>
 
 <div id="setup">
-    <div class="slogan">唯一支持安家軍</div>
-    <p style="color: #666; font-size: 14px; margin-bottom: 25px;">記憶邏輯已升級：五句內不重複</p>
-    <button onclick="initChat()" style="width: 100%; padding: 15px; font-size: 16px; background: #ff4d4d; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer;">進入群組</button>
+    <h1 style="color:#ff4d4d">唯一支持安家軍</h1>
+    <p style="font-size: 14px; color: #666;">模式：全自動互噴系統啟動</p>
+    <button onclick="initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer;">進入群組</button>
 </div>
 
 <div id="chat-container">
-    <div id="status-bar">新店顏家 - 靈魂對話 (不重複模式)</div>
+    <div id="status-bar">新店顏家 - 靈魂對話 (全自動)</div>
     <div id="messages"></div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="隨便聊聊..." onkeypress="if(event.keyCode==13) doSend()">
+        <input type="text" id="userInput" placeholder="潛水或進來吵架..." onkeypress="if(event.keyCode==13) doSend()">
         <button onclick="doSend()">傳送</button>
     </div>
 </div>
@@ -40,71 +39,51 @@
 <script>
 const characters = {
     "熊剛剛Jimmy": {
-        quotes: [
-            "笑死，到底。",
-            "我現在這資料庫只有20句，但我打算寫個手遊騙課長錢。",
-            "風險對沖懂嗎？帶四川媳婦都不用改機票，這才是贏家。",
-            "不信，肯定有外遇。",
-            "槓桿開太大會翻車，像這種沒鑽的求婚就是失敗。",
-            "望周知，我打算明年尾牙叫大課長請客。",
-            "細狗，你這品味真的被嫌到一無處。",
-            "止損啊，不回你就止損，像我對沖多好。",
-            "這種資料庫深度，只有我寫得出來。",
-            "笑死，你們這群人到底有沒有邏輯？"
-        ],
-        history: [] // 儲存最近說過的話
+        quotes: ["笑死，到底。", "我資料庫只有20句，但我打算寫個手遊騙課長錢。", "風險對沖懂嗎？", "不信，肯定有外遇。", "望周知，明年尾牙叫大課長請客。", "細狗，這品味被嫌一無處。", "止損啊，不回你就止損。", "我剛回測了一下，這波真的要止損。", "笑死，你們這群人真的沒邏輯。"],
+        history: []
     },
     "王水源": {
-        quotes: [
-            "好痛苦，嘉恩又不回我了。",
-            "想找個正常人交往好難，我現在五味雜陳。",
-            "旺宏亮燈了，但我心裡還是嘉恩。",
-            "假賽啦，這種事講了誰信？",
-            "我支持帶菜刀安去萬聖節，裝扮成恰吉絕對第一名。",
-            "東京改期了，我現在只想在微風求婚。",
-            "那種 50 層樓的高度墜落感，你們懂嗎？",
-            "嘉恩這女人真的沒救，我好痛苦。",
-            "無言，我現在整個人五味雜陳。",
-            "到底為什麼嘉恩不回訊息？"
-        ],
+        quotes: ["好痛苦，嘉恩又不回我了。", "想找個正常人交往好難。", "旺宏亮燈了，但我心裡還是嘉恩。", "假賽啦，誰信？", "帶菜刀安去萬聖節扮恰吉絕對第一名。", "東京改期了，我現在只想在微風求婚。", "那種 50 層樓的墜落感，你們懂嗎？", "五味雜陳，無言。", "所以嘉恩到底在哪？"],
         history: []
     },
     "黃子庭 Troy": {
-        quotes: [
-            "操你媽，有人在乎我的感受嗎？",
-            "Alia 嫌我選的東西一無是處，我真的想死。",
-            "沒看到菜刀安真的硬不起來，這就是我的設定。",
-            "細狗，你才細狗，全家都細狗。",
-            "古箏我就不撒這個謊了，反正講了你們也不會信。",
-            "回去又要周旋到早上 7 點了，以圖為證。",
-            "沒人在乎我的感受，我就是個局外人。",
-            "唯一支持菜刀安🔪！恰吉本尊。",
-            "這品味 Alia 嫌到爆，我真的無奈。",
-            "操，我這輩子就毀在這些女人手裡。"
-        ],
+        quotes: ["操你媽，有人在乎我的感受嗎？", "Alia 嫌我選的東西一無是處。", "沒看到菜刀安真的硬不起來。", "細狗，你全家都細狗。", "古箏撒謊你們也不會信。", "回去又要周旋到早上 7 點了。", "唯一支持菜刀安🔪！", "以圖為證啦，看清楚。", "這品味被 Alia 嫌到爆，我真的無奈。"],
         history: []
     },
     "Gee Homie": {
-        quotes: [
-            "愛了，這是通知不是商量。",
-            "我是 Cartier 的大客戶，求婚沒鑽就是失敗。",
-            "我不信，這肯定是外遇。",
-            "打傳說啊，Jimmy 你是不是太閒了？",
-            "嫂子實習當辣媽要快，娶大陸人手續我最熟。",
-            "課長就是要請客，但我只課有質感的手遊。",
-            "這就是 Cartier 客戶的尊嚴，懂嗎？",
-            "通知，不是商量，懂？",
-            "傳說對決開房啦，我凱撒路。",
-            "娶大陸人資料我最齊，誰要？"
-        ],
+        quotes: ["愛了，這是通知不是商量。", "我是 Cartier 大客戶，求婚沒鑽就是失敗。", "我不信，肯定是外遇。", "打傳說啊，Jimmy 你是不是太閒了？", "娶大陸人手續我最熟。", "這就是 Cartier 客戶的尊嚴。", "通知，不是商量，懂？", "課長就是要請客，但我只課有質感的手遊。", "傳說對決開房啦，我凱撒路。"],
         history: []
     }
 };
 
+let lastMessageTime = Date.now();
+let autoChatTimer = null;
+
 function initChat() {
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "已進入群組。AI 記憶鎖定：五句內不重複重複金句。", "bot");
+    addMsg("系統", "已進入群組。成員現在會自行聊天。", "bot");
+    startAutoChatLogic();
+}
+
+// 核心：全自動社交邏輯
+function startAutoChatLogic() {
+    autoChatTimer = setInterval(() => {
+        const timeSinceLastMsg = Date.now() - lastMessageTime;
+        // 如果超過 12 秒沒人說話，角色主動開話題
+        if (timeSinceLastMsg > 12000) {
+            triggerRandomConversation();
+        }
+    }, 5000);
+}
+
+function triggerRandomConversation() {
+    // 隨機決定由誰開頭
+    const charNames = Object.keys(characters);
+    const starter = charNames[Math.floor(Math.random() * charNames.length)];
+    
+    // 執行連鎖對話 (1-4人接話)
+    runChainReaction(Math.floor(Math.random() * 3) + 2); 
 }
 
 function doSend() {
@@ -114,34 +93,40 @@ function doSend() {
 
     addMsg("你", text, "user");
     input.value = "";
+    lastMessageTime = Date.now(); // 重置閒置計時
 
-    setTimeout(() => {
-        const charNames = Object.keys(characters);
-        const responder = charNames[Math.floor(Math.random() * charNames.length)];
-        const reply = getUniqueReply(responder);
-        addMsg(responder, reply, "bot");
-    }, 800);
+    // 你說話後，觸發 1-3 人回覆
+    runChainReaction(Math.floor(Math.random() * 3) + 1);
 }
 
-// 核心邏輯：五句內不重複
+function runChainReaction(count) {
+    let usedInThisTurn = [];
+    for (let i = 0; i < count; i++) {
+        setTimeout(() => {
+            const charNames = Object.keys(characters).filter(name => !usedInThisTurn.includes(name));
+            if (charNames.length === 0) return;
+
+            const responder = charNames[Math.floor(Math.random() * charNames.length)];
+            usedInThisTurn.push(responder);
+            
+            const reply = getUniqueReply(responder);
+            addMsg(responder, reply, "bot");
+            lastMessageTime = Date.now(); // 更新最後說話時間
+        }, 1200 * (i + 1)); // 稍微拉長間隔，更有聊天感
+    }
+}
+
 function getUniqueReply(name) {
     const char = characters[name];
     let selectedQuote = "";
-    
-    // 隨機抽選，直到不在最近的歷史紀錄中
     let attempts = 0;
     do {
         selectedQuote = char.quotes[Math.floor(Math.random() * char.quotes.length)];
         attempts++;
-        // 如果嘗試太多次（防止死循環，雖然這裡機率極低），就直接用了
     } while (char.history.includes(selectedQuote) && attempts < 20);
 
-    // 更新歷史紀錄
     char.history.push(selectedQuote);
-    if (char.history.length > 5) {
-        char.history.shift(); // 移除最舊的一句
-    }
-
+    if (char.history.length > 5) char.history.shift();
     return selectedQuote;
 }
 
