@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新店顏家 - 自動社交版</title>
+    <title>新店顏家 - 安家軍全功能旗艦版</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
-        #setup { background: white; padding: 40px 30px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 340px; }
+        #setup { background: white; padding: 30px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 340px; }
         #chat-container { display: none; width: 100%; max-width: 500px; height: 100vh; background: #84a1c1; flex-direction: column; }
         #status-bar { background: rgba(0,0,0,0.2); padding: 12px; color: white; font-weight: bold; text-align: center; }
         #messages { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; }
@@ -17,73 +17,134 @@
         .input-box { background: #fff; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
         button { background: #00c300; color: white; border: none; padding: 0 22px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        
+        /* 推薦標籤樣式 */
+        .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 15px 0; }
+        .suggest-tag { background: #f0f2f5; color: #ff4d4d; padding: 8px 12px; border-radius: 15px; font-size: 13px; cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
+        .suggest-tag:hover { background: #ff4d4d; color: white; }
     </style>
 </head>
 <body>
 
 <div id="setup">
-    <h1 style="color:#ff4d4d">唯一支持安家軍</h1>
-    <p style="font-size: 14px; color: #666;">模式：全自動互噴系統啟動</p>
-    <button onclick="initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer;">進入群組</button>
+    <h1 style="color:#ff4d4d; margin-bottom:10px;">唯一支持安家軍</h1>
+    <p style="font-size: 13px; color: #888;">戳中他們的痛點試試：</p>
+    
+    <div class="suggestions">
+        <div class="suggest-tag" onclick="quickSend('Jimmy，現在股票可以進場嗎？')">問股票</div>
+        <div class="suggest-tag" onclick="quickSend('Jimmy，教我什麼叫風險對沖')">對沖教學</div>
+        <div class="suggest-tag" onclick="quickSend('水源，嘉恩下飛機回你了嗎？')">嘉恩進度</div>
+        <div class="suggest-tag" onclick="quickSend('子庭，Alia 又在嫌你品味一無是處了')">子庭品味</div>
+        <div class="suggest-tag" onclick="quickSend('Gee Homie，傳說開房啊，我凱薩路')">打傳說</div>
+        <div class="suggest-tag" onclick="quickSend('大家要不要帶菜刀安去萬聖節扮恰吉？')">萬聖節恰吉</div>
+    </div>
+
+    <button onclick="initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; margin-top: 10px;">進入新店顏家群組</button>
 </div>
 
 <div id="chat-container">
-    <div id="status-bar">新店顏家 - 靈魂對話 (全自動)</div>
+    <div id="status-bar">新店顏家 - 靈魂對話 (全功能版)</div>
     <div id="messages"></div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="潛水或進來吵架..." onkeypress="if(event.keyCode==13) doSend()">
+        <input type="text" id="userInput" placeholder="隨便噴，或者看他們吵架..." onkeypress="if(event.keyCode==13) doSend()">
         <button onclick="doSend()">傳送</button>
     </div>
 </div>
 
 <script>
+// --- 資料庫設定 ---
 const characters = {
     "熊剛剛Jimmy": {
-        quotes: ["笑死，到底。", "我資料庫只有20句，但我打算寫個手遊騙課長錢。", "風險對沖懂嗎？", "不信，肯定有外遇。", "望周知，明年尾牙叫大課長請客。", "細狗，這品味被嫌一無處。", "止損啊，不回你就止損。", "我剛回測了一下，這波真的要止損。", "笑死，你們這群人真的沒邏輯。"],
+        quotes: [
+            "笑死，到底。",
+            "風險對沖懂嗎？我在四川娶媳婦，這叫地理位置避險。",
+            "槓桿開到滿會爆倉，像你這種品味就是爆倉代表。",
+            "望周知，我明年尾牙叫大課長請客。",
+            "這波回測沒過，建議直接止損。",
+            "笑死，你連 K 線都看不懂還想對沖？",
+            "這資料庫深度 20 句剛好，太多你也讀不懂。",
+            "股票賠錢是你的事，對沖不對是邏輯問題。",
+            "我現在正忙著優化手遊課金系統，別吵。",
+            "這就是典型的非系統性風險，笑死。"
+        ],
+        triggers: [
+            { key: "股票", reply: "笑死，現在這水位你還敢問股票？我看你是想當韭菜被對沖掉。" },
+            { key: "對沖", reply: "對沖是藝術。像我娶四川老婆，這叫感情風險對沖策略，你們細狗不懂啦。" },
+            { key: "賠錢", reply: "止損懂嗎？止損！不會止損的人資料庫大概只有2句吧。" },
+            { key: "槓桿", reply: "槓桿不是每個人都能開的，沒那個屁股就別吃那個瀉藥。" }
+        ],
         history: []
     },
     "王水源": {
-        quotes: ["好痛苦，嘉恩又不回我了。", "想找個正常人交往好難。", "旺宏亮燈了，但我心裡還是嘉恩。", "假賽啦，誰信？", "帶菜刀安去萬聖節扮恰吉絕對第一名。", "東京改期了，我現在只想在微風求婚。", "那種 50 層樓的墜落感，你們懂嗎？", "五味雜陳，無言。", "所以嘉恩到底在哪？"],
+        quotes: [
+            "好痛苦，嘉恩又不回我了。",
+            "旺宏亮燈了，但我心裡還是嘉恩。",
+            "假賽啦，誰信？",
+            "帶菜刀安去扮恰吉絕對第一名。",
+            "東京改期了，微風求婚有搞頭嗎？",
+            "50 層樓的高度墜落感，你們懂嗎？",
+            "無言，我現在整個人五味雜陳。",
+            "嘉恩這女人真的沒救，我好痛苦。"
+        ],
         history: []
     },
     "黃子庭 Troy": {
-        quotes: ["操你媽，有人在乎我的感受嗎？", "Alia 嫌我選的東西一無是處。", "沒看到菜刀安真的硬不起來。", "細狗，你全家都細狗。", "古箏撒謊你們也不會信。", "回去又要周旋到早上 7 點了。", "唯一支持菜刀安🔪！", "以圖為證啦，看清楚。", "這品味被 Alia 嫌到爆，我真的無奈。"],
+        quotes: [
+            "操你媽，有人在乎我的感受嗎？",
+            "Alia 嫌我選的東西一無是處。",
+            "沒看到菜刀安真的硬不起來。",
+            "細狗，你全家都細狗。",
+            "古箏撒謊你們也不會信。",
+            "回去又要周旋到早上 7 點了。",
+            "唯一支持菜刀安🔪！",
+            "以圖為證啦，看清楚。",
+            "沒人在乎我的感受，我就是個局外人。"
+        ],
         history: []
     },
     "Gee Homie": {
-        quotes: ["愛了，這是通知不是商量。", "我是 Cartier 大客戶，求婚沒鑽就是失敗。", "我不信，肯定是外遇。", "打傳說啊，Jimmy 你是不是太閒了？", "娶大陸人手續我最熟。", "這就是 Cartier 客戶的尊嚴。", "通知，不是商量，懂？", "課長就是要請客，但我只課有質感的手遊。", "傳說對決開房啦，我凱撒路。"],
+        quotes: [
+            "愛了，這是通知不是商量。",
+            "我是 Cartier 大客戶，求婚沒鑽就是失敗。",
+            "我不信，肯定是外遇。",
+            "打傳說啊，開房啦。",
+            "娶大陸人手續我最熟。",
+            "這就是 Cartier 客戶的尊嚴。",
+            "通知，不是商量，懂？",
+            "傳說對決開房啦，我凱撒路。",
+            "課長就是要請客，但我只課有質感的手遊。"
+        ],
         history: []
     }
 };
 
 let lastMessageTime = Date.now();
-let autoChatTimer = null;
+
+// --- 邏輯功能 ---
+
+function quickSend(text) {
+    initChat();
+    setTimeout(() => {
+        document.getElementById('userInput').value = text;
+        doSend();
+    }, 300);
+}
 
 function initChat() {
+    if(document.getElementById('setup').style.display === 'none') return;
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
     addMsg("系統", "已進入群組。成員現在會自行聊天。", "bot");
     startAutoChatLogic();
 }
 
-// 核心：全自動社交邏輯
 function startAutoChatLogic() {
-    autoChatTimer = setInterval(() => {
-        const timeSinceLastMsg = Date.now() - lastMessageTime;
-        // 如果超過 12 秒沒人說話，角色主動開話題
-        if (timeSinceLastMsg > 12000) {
-            triggerRandomConversation();
+    setInterval(() => {
+        // 15秒沒人說話，角色主動開話題
+        if (Date.now() - lastMessageTime > 15000) {
+            runChainReaction(Math.floor(Math.random() * 2) + 2); 
         }
     }, 5000);
-}
-
-function triggerRandomConversation() {
-    // 隨機決定由誰開頭
-    const charNames = Object.keys(characters);
-    const starter = charNames[Math.floor(Math.random() * charNames.length)];
-    
-    // 執行連鎖對話 (1-4人接話)
-    runChainReaction(Math.floor(Math.random() * 3) + 2); 
 }
 
 function doSend() {
@@ -93,26 +154,31 @@ function doSend() {
 
     addMsg("你", text, "user");
     input.value = "";
-    lastMessageTime = Date.now(); // 重置閒置計時
-
-    // 你說話後，觸發 1-3 人回覆
-    runChainReaction(Math.floor(Math.random() * 3) + 1);
+    lastMessageTime = Date.now();
+    runChainReaction(Math.floor(Math.random() * 3) + 1, text);
 }
 
-function runChainReaction(count) {
+function runChainReaction(count, userText = "") {
     let usedInThisTurn = [];
     for (let i = 0; i < count; i++) {
         setTimeout(() => {
             const charNames = Object.keys(characters).filter(name => !usedInThisTurn.includes(name));
             if (charNames.length === 0) return;
-
             const responder = charNames[Math.floor(Math.random() * charNames.length)];
             usedInThisTurn.push(responder);
             
-            const reply = getUniqueReply(responder);
+            let reply = "";
+            // 熊剛剛關鍵字特殊邏輯
+            if (responder === "熊剛剛Jimmy" && userText !== "") {
+                const triggerMatch = characters["熊剛剛Jimmy"].triggers.find(t => userText.includes(t.key));
+                if (triggerMatch) reply = triggerMatch.reply;
+            }
+            
+            if (!reply) reply = getUniqueReply(responder);
+            
             addMsg(responder, reply, "bot");
-            lastMessageTime = Date.now(); // 更新最後說話時間
-        }, 1200 * (i + 1)); // 稍微拉長間隔，更有聊天感
+            lastMessageTime = Date.now();
+        }, 1200 * (i + 1));
     }
 }
 
@@ -123,8 +189,8 @@ function getUniqueReply(name) {
     do {
         selectedQuote = char.quotes[Math.floor(Math.random() * char.quotes.length)];
         attempts++;
-    } while (char.history.includes(selectedQuote) && attempts < 20);
-
+    } while (char.history.includes(selectedQuote) && attempts < 15);
+    
     char.history.push(selectedQuote);
     if (char.history.length > 5) char.history.shift();
     return selectedQuote;
