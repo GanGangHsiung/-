@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新店顏家 - 安家軍 AI 最終版</title>
+    <title>新店顏家 - 安家軍 AI SDK 版</title>
     <style>
         body { font-family: -apple-system, sans-serif; background: #84a1c1; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; }
         #setup { background: white; padding: 40px 30px; border-radius: 20px; text-align: center; box-shadow: 0 15px 35px rgba(0,0,0,0.3); width: 340px; }
@@ -25,73 +25,75 @@
 
 <div id="setup">
     <div class="slogan">唯一支持安家軍</div>
-    <p style="color: #666; font-size: 13px;">AI 引擎與語氣過濾解鎖中...</p>
+    <p style="color: #666; font-size: 13px;">SDK 核心加載中：Alia / 菜刀安 / 嘉恩</p>
     <button onclick="initChat()" style="width: 100%; padding: 15px; background: #ff4d4d; border-radius: 25px; color: white; border: none; cursor: pointer; font-weight: bold;">進入群組</button>
 </div>
 
 <div id="chat-container">
-    <div id="status-bar">新店顏家 - 靈魂 AI 模式 (Gemini 1.5)</div>
+    <div id="status-bar">新店顏家 - AI 模式 (Gemini 1.5 SDK)</div>
     <div id="messages"></div>
-    <div id="typing-indicator" class="typing">安家軍正在輸入...</div>
+    <div id="typing-indicator" class="typing">安家軍正在打字...</div>
     <div class="input-box">
-        <input type="text" id="userInput" placeholder="輸入關鍵字聊聊..." onkeypress="if(event.keyCode==13) doSend()">
-        <button onclick="doSend()">傳送</button>
+        <input type="text" id="userInput" placeholder="輸入關鍵字聊聊..." onkeypress="if(event.keyCode==13) window.doSend()">
+        <button onclick="window.doSend()">傳送</button>
     </div>
 </div>
 
-<script>
-// 使用你提供的最新 API KEY
+<script type="importmap">
+  {
+    "imports": {
+      "@google/generative-ai": "https://esm.run/@google/generative-ai"
+    }
+  }
+</script>
+
+<script type="module">
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
 const API_KEY = "AIzaSyAOayzw7l-gKRbwDb0SOruWqT2-Gkzd6Jo";
+const genAI = new GoogleGenerativeAI(API_KEY);
 
 const systemPrompt = `
-你是「新店顏家」群組的後台判別器。請根據使用者輸入，挑選最適合的人回覆。
-性格設定：
-1. 熊剛剛Jimmy：理財魔人、止損、風險對沖、笑死。
-2. 王水源：苦主。嘉恩不回訊息、好痛苦、東京改期、旺宏亮燈。
-3. 黃子庭 Troy：火爆、細狗、操你媽、菜刀安、Alia嫌他品味。
-4. Gee Homie：Cartier客戶、通知不是商量、求婚沒鑽失敗。
+你現在是台灣群組「新店顏家」的後台。
+請根據使用者輸入，挑選一位最適合的人回覆，並模仿他的靈魂語氣。
+
+1. 熊剛剛Jimmy：理財魔人、風險對沖、笑死、止損、四川媳婦。
+2. 王水源：苦主。嘉恩不回訊息、好痛苦、東京改期、旺宏亮燈、微風求婚。
+3. 黃子庭 Troy：火爆老闆、菜刀安、Alia嫌他品味、細狗、操你媽。
+4. Gee Homie：Cartier客戶、通知不是商量、求婚沒鑽失敗、我是課長。
 
 格式：角色名|回覆內容
 `;
 
 async function getAIReply(userText) {
-    // 修正請求路徑為標準 v1 版本
-    const apiURL = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
-    
     try {
-        const response = await fetch(apiURL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: systemPrompt + "\n使用者說：" + userText }] }],
-                // 加入安全性設定，避免屏蔽你們的口頭禪
-                safetySettings: [
-                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                ]
-            })
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            // 讓 AI 敢講髒話與垃圾話
+            safetySettings: [
+                { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+            ]
         });
-        
-        const data = await response.json();
-        
-        if (data.error) return `系統|錯誤：${data.error.message}`;
-        
-        // 確保 AI 輸出符合格式
-        return data.candidates[0].content.parts[0].text.trim();
+
+        const result = await model.generateContent(systemPrompt + "\n使用者說：" + userText);
+        const response = await result.response;
+        return response.text().trim();
     } catch (e) {
-        return `系統|連線失敗：${e.message}`;
+        return `系統|SDK 錯誤：${e.message}`;
     }
 }
 
-function initChat() {
+// 綁定到 window 以便 HTML 呼叫
+window.initChat = () => {
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
-    addMsg("系統", "唯一支持安家軍！AI 引擎已對準模型。", "bot");
-}
+    addMsg("系統", "SDK 已啟動。唯一支持安家軍！", "bot");
+};
 
-async function doSend() {
+window.doSend = async () => {
     const input = document.getElementById('userInput');
     const text = input.value.trim();
     if(!text) return;
@@ -107,9 +109,9 @@ async function doSend() {
         const [name, content] = aiResult.split('|');
         addMsg(name.trim(), content.trim(), "bot");
     } else {
-        addMsg("系統回報", aiResult, "bot");
+        addMsg("系統", aiResult, "bot");
     }
-}
+};
 
 function addMsg(sender, text, type) {
     const box = document.getElementById('messages');
