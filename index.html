@@ -14,11 +14,36 @@
         .msg.bot { background: white; align-self: flex-start; border-top-left-radius: 2px; }
         .msg.user { background: #95ec69; align-self: flex-end; border-top-right-radius: 2px; }
         .name { font-size: 11px; color: #555; margin-bottom: 4px; font-weight: bold; }
-        .input-box { background: #fff; padding: 15px; display: flex; gap: 10px; border-top: 1px solid #ddd; }
+        
+        /* --- 新增：輸入區複合樣式 --- */
+        .input-area-wrapper { background: #fff; border-top: 1px solid #ddd; }
+        .dynamic-suggestion-bar { 
+            display: flex; 
+            overflow-x: auto; 
+            gap: 8px; 
+            padding: 8px 12px; 
+            background: #f8f9fa; 
+            border-bottom: 1px solid #eee;
+            scrollbar-width: none; /* 隱藏捲軸 */
+        }
+        .dynamic-suggestion-bar::-webkit-scrollbar { display: none; }
+        .mini-tag { 
+            white-space: nowrap; 
+            background: white; 
+            color: #ff4d4d; 
+            border: 1px solid #ff4d4d; 
+            padding: 4px 12px; 
+            border-radius: 15px; 
+            font-size: 12px; 
+            cursor: pointer; 
+            flex-shrink: 0;
+        }
+        /* ----------------------- */
+
+        .input-box { background: #fff; padding: 15px; display: flex; gap: 10px; }
         input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 18px; outline: none; }
         button { background: #00c300; color: white; border: none; padding: 0 22px; border-radius: 25px; cursor: pointer; font-weight: bold; }
         
-        /* 推薦標籤樣式 */
         .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 15px 0; }
         .suggest-tag { background: #f0f2f5; color: #ff4d4d; padding: 8px 12px; border-radius: 15px; font-size: 13px; cursor: pointer; border: 1px solid #eee; transition: 0.2s; }
         .suggest-tag:hover { background: #ff4d4d; color: white; }
@@ -45,14 +70,19 @@
 <div id="chat-container">
     <div id="status-bar">新店顏家 - 靈魂對話 (全功能版)</div>
     <div id="messages"></div>
-    <div class="input-box">
-        <input type="text" id="userInput" placeholder="隨便噴，或者看他們吵架..." onkeypress="if(event.keyCode==13) doSend()">
-        <button onclick="doSend()">傳送</button>
+    
+    <div class="input-area-wrapper">
+        <div id="dynamicTags" class="dynamic-suggestion-bar">
+            </div>
+        <div class="input-box">
+            <input type="text" id="userInput" placeholder="隨便噴，或者看他們吵架..." onkeypress="if(event.keyCode==13) doSend()">
+            <button onclick="doSend()">傳送</button>
+        </div>
     </div>
 </div>
 
 <script>
-// --- 資料庫設定 ---
+// --- 資料庫設定 (完全保留，未刪減) ---
 const characters = {
     "熊剛剛Jimmy": {
         quotes: [
@@ -118,9 +148,39 @@ const characters = {
     }
 };
 
+// 新增：動態標籤題庫 (從原本的快捷按鈕延伸)
+const tagPool = [
+    { label: "問股票", text: "Jimmy，現在股票可以進場嗎？" },
+    { label: "對沖教學", text: "Jimmy，教我什麼叫風險對沖" },
+    { label: "嘉恩進度", text: "水源，嘉恩下飛機回你了嗎？" },
+    { label: "子庭品味", text: "子庭，Alia 又在嫌你品味一無是處了" },
+    { label: "打傳說", text: "Gee Homie，傳說開房啊，我凱薩路" },
+    { label: "萬聖節恰吉", text: "大家要不要帶菜刀安去萬聖節扮恰吉？" },
+    { label: "問鑽戒", text: "Gee Homie，求婚沒鑽是不是看不起顏家？" },
+    { label: "旺宏亮燈", text: "水源，旺宏亮燈了，嘉恩回你了沒？" }
+];
+
 let lastMessageTime = Date.now();
 
-// --- 邏輯功能 ---
+// --- 新增：刷新標籤邏輯 ---
+function refreshDynamicTags() {
+    const container = document.getElementById('dynamicTags');
+    container.innerHTML = '';
+    // 隨機選 4 個不重複的
+    const shuffled = [...tagPool].sort(() => 0.5 - Math.random()).slice(0, 4);
+    shuffled.forEach(item => {
+        const span = document.createElement('div');
+        span.className = 'mini-tag';
+        span.innerText = item.label;
+        span.onclick = () => {
+            document.getElementById('userInput').value = item.text;
+            doSend();
+        };
+        container.appendChild(span);
+    });
+}
+
+// --- 原有邏輯功能 (完全保留) ---
 
 function quickSend(text) {
     initChat();
@@ -135,14 +195,15 @@ function initChat() {
     document.getElementById('setup').style.display = 'none';
     document.getElementById('chat-container').style.display = 'flex';
     addMsg("系統", "已進入群組。成員現在會自行聊天。", "bot");
+    refreshDynamicTags(); // 初始化動態標籤
     startAutoChatLogic();
 }
 
 function startAutoChatLogic() {
     setInterval(() => {
-        // 15秒沒人說話，角色主動開話題
         if (Date.now() - lastMessageTime > 15000) {
             runChainReaction(Math.floor(Math.random() * 2) + 2); 
+            refreshDynamicTags(); // 自動說話時也刷一下標籤
         }
     }, 5000);
 }
@@ -155,6 +216,7 @@ function doSend() {
     addMsg("你", text, "user");
     input.value = "";
     lastMessageTime = Date.now();
+    refreshDynamicTags(); // 每次手動送出後也刷一下標籤
     runChainReaction(Math.floor(Math.random() * 3) + 1, text);
 }
 
@@ -168,7 +230,6 @@ function runChainReaction(count, userText = "") {
             usedInThisTurn.push(responder);
             
             let reply = "";
-            // 熊剛剛關鍵字特殊邏輯
             if (responder === "熊剛剛Jimmy" && userText !== "") {
                 const triggerMatch = characters["熊剛剛Jimmy"].triggers.find(t => userText.includes(t.key));
                 if (triggerMatch) reply = triggerMatch.reply;
